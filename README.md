@@ -47,13 +47,17 @@ docker exec -it postgresql psql -d postgres -U admin
 6. Using your postgres terminal, locate the stream ID being used as the table name to host each ComposeDB model instance. It will have a name starting with "k" and will appear as a string of random letters and integers:
 
 ```bash
-postgres=# \dt*.*
+(postgres terminal) 
+
+\dt*.*
 ```
 
 7. Add a serial ID column to this table (replace my table name below with your actual one):
 
 ```bash
-postgres=# ALTER TABLE kjzl6hvfrbw6c967typhcx813d0jdomlt2tv762n6ffp22l6u9xf0gar2yrtwbu ADD COLUMN id SERIAL;
+(postgres terminal)
+
+ALTER TABLE kjzl6hvfrbw6c967typhcx813d0jdomlt2tv762n6ffp22l6u9xf0gar2yrtwbu ADD COLUMN id SERIAL;
 ```
 
 8. Trigger the following endpoint with a GET request to populate your table (you can use Postman or use curl):
@@ -65,7 +69,9 @@ curl http://localhost:3000/api/create
 You can check on the status of the population of dummy data by performing the following in your postgres terminal:
 
 ```bash
-postgres=# SELECT COUNT(stream_id) FROM kjzl6hvfrbw6c967typhcx813d0jdomlt2tv762n6ffp22l6u9xf0gar2yrtwbu;
+(postgres terminal) 
+
+SELECT COUNT(stream_id) FROM kjzl6hvfrbw6c967typhcx813d0jdomlt2tv762n6ffp22l6u9xf0gar2yrtwbu;
 ```
 Once the count reaches 840, the dummy data has been populated
 
@@ -74,35 +80,44 @@ Once the count reaches 840, the dummy data has been populated
 1. Back in your postgres terminal, establish an hll extension:
 
 ```bash
-postgres=# CREATE EXTENSION hll;
+(postgres terminal)
+
+CREATE EXTENSION hll;
 ```
 
 2. Create an hour-based rollup table - the `visitor` field will contain an integer between 1-100 representing a unique human (see /api/create.ts to see how I auto-populated the table with dummy data), and `stream_content` field contains hashed values using the HLL algorithm, allowing us to obtain approximate counts of the values:
 
 ```bash
-postgres=# CREATE TABLE pageview_hourly_rollup (
-        hour timestamp,
-        visitor int,
-        stream_content hll,
-        unique (hour, visitor)
+(postgres terminal) 
+
+CREATE TABLE pageview_hourly_rollup (
+    hour timestamp,
+    visitor int,
+    stream_content hll,
+    unique (hour, visitor)
 );
 ```
 3. Aggregate and store your data from your table containing 840 rows (this will only work once due to the `unique` constraint):
 
 ```bash
-postgres=# INSERT INTO pageview_hourly_rollup
-            SELECT
-                date_trunc('hour', TO_TIMESTAMP(stream_content->>'time', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')::timestamp) AS hour,
-                CAST(stream_content->>'visitor' AS INTEGER) AS visitor,
-                hll_add_agg(hll_hash_integer(CAST(stream_content->>'visitor' AS INTEGER)))
-            FROM kjzl6hvfrbw6c967typhcx813d0jdomlt2tv762n6ffp22l6u9xf0gar2yrtwbu 
-            GROUP BY 1, 2;
+(postgres terminal) 
+
+INSERT INTO pageview_hourly_rollup
+    SELECT
+        date_trunc('hour', TO_TIMESTAMP(stream_content->>'time', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')::timestamp) AS hour,
+        CAST(stream_content->>'visitor' AS INTEGER) AS visitor,
+        hll_add_agg(hll_hash_integer(CAST(stream_content->>'visitor' AS INTEGER)))
+    FROM kjzl6hvfrbw6c967typhcx813d0jdomlt2tv762n6ffp22l6u9xf0gar2yrtwbu 
+    GROUP BY 1, 2;
 );
 ```
 4. Turn timing on to test performance and run an aggregation query:
 
 ```bash
-postgres=# \timing
+(postgres terminal) 
+
+\timing
+
 SELECT
    hour,
   hll_cardinality(hll_union_agg((stream_content))) AS hourly_uniques
@@ -116,8 +131,10 @@ LIMIT 15;
 5. Compare performance against the equivalent query ran without hll:
 
 ```bash
-postgres=# SELECT
-	date_trunc('hour', TO_TIMESTAMP(stream_content->>'time', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')::timestamp) AS hour,
+(postgres terminal) 
+
+SELECT
+  date_trunc('hour', TO_TIMESTAMP(stream_content->>'time', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')::timestamp) AS hour,
   COUNT(DISTINCT CAST(stream_content->>'visitor' AS INTEGER)) AS visitor
 FROM kjzl6hvfrbw6c967typhcx813d0jdomlt2tv762n6ffp22l6u9xf0gar2yrtwbu
 GROUP BY 1
