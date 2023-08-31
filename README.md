@@ -105,7 +105,6 @@ INSERT INTO pageview_hourly_rollup
         hll_add_agg(hll_hash_integer(CAST(stream_content->>'visitor' AS INTEGER)))
     FROM kjzl6hvfrbw6c7ywypher7e8qu3anaky4j2lqred760lcvcf7s363ndk5ujwf1u 
     GROUP BY 1, 2;
-)
 ```
 4. Turn timing on to test performance and run an aggregation query:
 
@@ -121,7 +120,6 @@ FROM pageview_hourly_rollup
 GROUP BY 1
 ORDER BY 1
 LIMIT 15;
-)
 ```
 
 5. Compare performance against the equivalent query ran without hll:
@@ -136,7 +134,6 @@ FROM kjzl6hvfrbw6c7ywypher7e8qu3anaky4j2lqred760lcvcf7s363ndk5ujwf1u
 GROUP BY 1
 ORDER BY 1
 LIMIT 15;
-)
 ```
 
 ## Learn More
