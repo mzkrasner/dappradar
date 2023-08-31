@@ -33,7 +33,7 @@ In your newly-generated composedb.config.json file, you will need to replace the
 3. Launch postgres with the provided configuration in the docker-compose.yml file (you will need Docker installed locally):
 
 ```bash
-docker compose-up
+docker-compose up
 ```
 
 4. Begin your application in a new terminal (first ensure you are running node v16 in your terminal):
@@ -48,7 +48,7 @@ npm run dev
 docker exec -it postgresql psql -d postgres -U admin
 ```
 
-6. Using your postgres terminal, locate the stream ID being used as the table name to host each ComposeDB model instance. It will have a name starting with "k" and will appear as a string of random letters and integers:
+6. Using your postgres terminal, locate the stream ID being used as the table name to host each ComposeDB model instance. It will have a name starting with "k" and will appear as a string of random letters and integers. You will need this for some of the following steps:
 
 ```bash
 (postgres terminal) 
@@ -56,28 +56,20 @@ docker exec -it postgresql psql -d postgres -U admin
 \dt*.*
 ```
 
-7. Add a serial ID column to this table (replace my table name below with your actual one):
-
-```bash
-(postgres terminal)
-
-ALTER TABLE kjzl6hvfrbw6c967typhcx813d0jdomlt2tv762n6ffp22l6u9xf0gar2yrtwbu ADD COLUMN id SERIAL;
-```
-
-8. Trigger the following endpoint with a GET request to populate your table (you can use Postman or use curl):
+7. Trigger the following endpoint with a GET request to populate your table (you can use Postman or use curl):
 
 ```bash
 curl http://localhost:3000/api/create
 ```
 
-You can check on the status of the population of dummy data by performing the following in your postgres terminal:
+You can check on the status of the population of dummy data by performing the following in your postgres terminal (make sure to replace the table name with your unique stream from step 6):
 
 ```bash
 (postgres terminal) 
 
-SELECT COUNT(stream_id) FROM kjzl6hvfrbw6cat4esz1q0huznt5vedfg2bib5bjhkxb3vi18kyne0rbvc0vm71;
+SELECT COUNT(stream_id) FROM kjzl6hvfrbw6c7ywypher7e8qu3anaky4j2lqred760lcvcf7s363ndk5ujwf1u;
 ```
-Once the count reaches 840, the dummy data has been populated
+Once the count reaches 840, the dummy data has been populated, and you can continue with part 2 below (this may take a few moments)
 
 ### Part 2 - Add HLL Extension and Test Performance
 
@@ -101,7 +93,7 @@ CREATE TABLE pageview_hourly_rollup (
     unique (hour, visitor)
 );
 ```
-3. Aggregate and store your data from your table containing 840 rows (this will only work once due to the `unique` constraint):
+3. Aggregate and store your data from your table containing 840 rows after replacing the table name with yours(this will only work once due to the `unique` constraint):
 
 ```bash
 (postgres terminal) 
@@ -111,9 +103,9 @@ INSERT INTO pageview_hourly_rollup
         date_trunc('hour', TO_TIMESTAMP(stream_content->>'time', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')::timestamp) AS hour,
         CAST(stream_content->>'visitor' AS INTEGER) AS visitor,
         hll_add_agg(hll_hash_integer(CAST(stream_content->>'visitor' AS INTEGER)))
-    FROM kjzl6hvfrbw6c967typhcx813d0jdomlt2tv762n6ffp22l6u9xf0gar2yrtwbu 
+    FROM kjzl6hvfrbw6c7ywypher7e8qu3anaky4j2lqred760lcvcf7s363ndk5ujwf1u 
     GROUP BY 1, 2;
-);
+)
 ```
 4. Turn timing on to test performance and run an aggregation query:
 
@@ -129,7 +121,7 @@ FROM pageview_hourly_rollup
 GROUP BY 1
 ORDER BY 1
 LIMIT 15;
-);
+)
 ```
 
 5. Compare performance against the equivalent query ran without hll:
@@ -140,11 +132,11 @@ LIMIT 15;
 SELECT
   date_trunc('hour', TO_TIMESTAMP(stream_content->>'time', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')::timestamp) AS hour,
   COUNT(DISTINCT CAST(stream_content->>'visitor' AS INTEGER)) AS visitor
-FROM kjzl6hvfrbw6c967typhcx813d0jdomlt2tv762n6ffp22l6u9xf0gar2yrtwbu
+FROM kjzl6hvfrbw6c7ywypher7e8qu3anaky4j2lqred760lcvcf7s363ndk5ujwf1u
 GROUP BY 1
 ORDER BY 1
 LIMIT 15;
-);
+)
 ```
 
 ## Learn More
