@@ -26,6 +26,10 @@ npm install
 npm run generate
 ```
 
+In your newly-generated composedb.config.json file, you will need to replace the "db" property within "indexing" (currently set to sqlite) to the following: 
+
+`"postgres://admin:admin@localhost:5432/postgres"` 
+
 3. Launch postgres with the provided configuration in the docker-compose.yml file (you will need Docker installed locally):
 
 ```bash
@@ -71,7 +75,7 @@ You can check on the status of the population of dummy data by performing the fo
 ```bash
 (postgres terminal) 
 
-SELECT COUNT(stream_id) FROM kjzl6hvfrbw6c967typhcx813d0jdomlt2tv762n6ffp22l6u9xf0gar2yrtwbu;
+SELECT COUNT(stream_id) FROM kjzl6hvfrbw6cat4esz1q0huznt5vedfg2bib5bjhkxb3vi18kyne0rbvc0vm71;
 ```
 Once the count reaches 840, the dummy data has been populated
 
