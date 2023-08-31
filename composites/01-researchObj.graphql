@@ -1,6 +1,0 @@
-type ResearchObject @createModel(accountRelation: LIST, description: "A research object") {
-    author: DID! @documentAccount
-    title: String! @string(maxLength: 500)
-    manifest: CID!
-    metadata: String! @string(maxLength: 10000)
-}

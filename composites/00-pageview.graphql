@@ -1,0 +1,13 @@
+type Pageview @createModel(accountRelation: LIST, description: "A model representing a pageview") {
+    visitor: Int!
+    page: Page!
+    time: DateTime!
+}
+
+enum Page {
+  HOME
+  PRODUCTS
+  SERVICES
+  CONTACT
+} 
+

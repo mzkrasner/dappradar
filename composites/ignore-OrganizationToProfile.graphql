@@ -1,7 +1,0 @@
-type ProfileOf @loadModel(id: "$PROFILEOF_ID") {
-    id: ID!
-}
-
-type Organization @loadModel(id: "$ORG_ID") {
-  members: [ProfileOf] @relationFrom(model: "ProfileOf", property: "organizationId")
-}

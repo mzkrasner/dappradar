@@ -1,4 +1,0 @@
-type Profile @createModel(accountRelation: LIST, description: "A basic Profile") {
-    author: DID! @documentAccount
-    displayName: String! @string(maxLength: 100)
-}

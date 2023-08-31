@@ -22,44 +22,44 @@ export const writeComposite = async (spinner) => {
   await authenticate();
   spinner.info("writing composite to Ceramic");
 
-  const profileComposite = await createComposite(
-    ceramic,
-    "./composites/00-profile.graphql"
-  );
+  // const profileComposite = await createComposite(
+  //   ceramic,
+  //   "./composites/00-profile.graphql"
+  // );
 
-  const researchObj = await createComposite(
-    ceramic,
-    "./composites/01-researchObj.graphql"
-  );
+  // const researchObj = await createComposite(
+  //   ceramic,
+  //   "./composites/01-researchObj.graphql"
+  // );
 
-  const orgComposite = await createComposite(
-    ceramic,
-    "./composites/02-organization.graphql"
-  );
+  // const orgComposite = await createComposite(
+  //   ceramic,
+  //   "./composites/02-organization.graphql"
+  // );
 
-  const profAttestationSchema = readFileSync(
-    "./composites/03-profileAttestation.graphql",
-    {
-      encoding: "utf-8",
-    }
-  ).replace("$PROFILE_ID", profileComposite.modelIDs[0]);
+  // const profAttestationSchema = readFileSync(
+  //   "./composites/03-profileAttestation.graphql",
+  //   {
+  //     encoding: "utf-8",
+  //   }
+  // ).replace("$PROFILE_ID", profileComposite.modelIDs[0]);
 
-  const profAttestationComposite = await Composite.create({
-    ceramic,
-    schema: profAttestationSchema,
-  });
+  // const profAttestationComposite = await Composite.create({
+  //   ceramic,
+  //   schema: profAttestationSchema,
+  // });
 
-  const researchAttestationSchema = readFileSync(
-    "./composites/04-ResearchObjAttestation.graphql",
-    {
-      encoding: "utf-8",
-    }
-  ).replace("$RESEARCH_ID", researchObj.modelIDs[0]);
+  // const researchAttestationSchema = readFileSync(
+  //   "./composites/04-ResearchObjAttestation.graphql",
+  //   {
+  //     encoding: "utf-8",
+  //   }
+  // ).replace("$RESEARCH_ID", researchObj.modelIDs[0]);
 
-  const researchAttestationComposite = await Composite.create({
-    ceramic,
-    schema: researchAttestationSchema,
-  });
+  // const researchAttestationComposite = await Composite.create({
+  //   ceramic,
+  //   schema: researchAttestationSchema,
+  // });
 
   // const profileOfSchema = readFileSync("./composites/05-profileOf.graphql", {
   //   encoding: "utf-8",
@@ -82,12 +82,18 @@ export const writeComposite = async (spinner) => {
   //   schema: orgToProfileSchema,
   // });
 
+  const pageviewComposite = await createComposite(
+    ceramic,
+    "./composites/00-pageview.graphql"
+  );
+
   const composite = Composite.from([
-    profileComposite,
-    researchObj,
-    orgComposite,
-    profAttestationComposite,
-    researchAttestationComposite,
+    pageviewComposite
+    // profileComposite,
+    // researchObj,
+    // orgComposite,
+    // profAttestationComposite,
+    // researchAttestationComposite,
   //   profileOfComposite,
   //   orgToProfileComposite
    ]);
