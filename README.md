@@ -26,10 +26,6 @@ npm install
 npm run generate
 ```
 
-In your newly-generated composedb.config.json file, you will need to replace the "db" property within "indexing" (currently set to sqlite) to the following: 
-
-`"postgres://admin:admin@localhost:5432/postgres"` 
-
 3. Launch postgres with the provided configuration in the docker-compose.yml file (you will need Docker installed locally):
 
 ```bash

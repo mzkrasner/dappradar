@@ -48,7 +48,7 @@ export const RunCommands = async () => {
         "local-directory": `~/.ceramic/statestore/`,
       },
       indexing: {
-        db: `sqlite://${homedir()}/.ceramic/indexing.sqlite`,
+        db: `postgres://admin:admin@localhost:5432/postgres`,
         "allow-queries-before-historical-sync": true,
         models: [],
       },
